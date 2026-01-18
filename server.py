@@ -17,7 +17,6 @@ class LicenseKey(db.Model):
     used_by = db.Column(db.String(100), nullable=True)
     used_at = db.Column(db.DateTime, nullable=True)
 
-# Флаг для инициализации базы
 _initialized = False
 
 @app.before_request
@@ -26,7 +25,6 @@ def initialize_db():
     if not _initialized:
         if not os.path.exists('licenses.db'):
             db.create_all()
-            # Фиксированные ключи
             keys = [
                 ("W1K7-9FqR-2mN-pL8s", 7),
                 ("X3Y9-KpT4-8vB-nM2d", 7),
@@ -60,6 +58,7 @@ def activate():
     if license_key.used:
         return jsonify({"error": "Ключ уже использован"}), 403
 
+    # Удаляем ключ из базы
     db.session.delete(license_key)
     db.session.commit()
 
