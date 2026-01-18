@@ -5,7 +5,16 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///licenses.db'
+
+# Используем PostgreSQL на Render, SQLite локально
+if os.getenv("RENDER"):
+    # На Render.com
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace("postgres://", "postgresql://")
+else:
+    # Локально
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///licenses.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -23,8 +32,9 @@ _initialized = False
 def initialize_db():
     global _initialized
     if not _initialized:
-        if not os.path.exists('licenses.db'):
-            db.create_all()
+        db.create_all()
+        # Проверяем, есть ли уже ключи
+        if LicenseKey.query.count() == 0:
             keys = [
                 ("W1K7-9FqR-2mN-pL8s", 7),
                 ("X3Y9-KpT4-8vB-nM2d", 7),
@@ -58,7 +68,7 @@ def activate():
     if license_key.used:
         return jsonify({"error": "Ключ уже использован"}), 403
 
-    # Удаляем ключ из базы
+    # Удаляем ключ
     db.session.delete(license_key)
     db.session.commit()
 
