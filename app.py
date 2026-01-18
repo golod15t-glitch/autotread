@@ -1,15 +1,14 @@
+# server/server.py
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
-# Инициализация Flask
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///licenses.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Модель лицензии
 class LicenseKey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(50), unique=True, nullable=False)
@@ -18,7 +17,6 @@ class LicenseKey(db.Model):
     used_by = db.Column(db.String(100), nullable=True)
     used_at = db.Column(db.DateTime, nullable=True)
 
-# Создание базы и ключей при первом запуске
 @app.before_first_request
 def create_tables():
     if not os.path.exists('licenses.db'):
@@ -43,7 +41,6 @@ def create_tables():
         db.session.commit()
         print("✅ База данных создана. Добавлено 9 ключей.")
 
-# Активация ключа
 @app.route('/api/activate', methods=['POST'])
 def activate():
     data = request.get_json()
@@ -69,4 +66,4 @@ def activate():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
