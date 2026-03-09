@@ -1,0 +1,309 @@
+// ============================================
+// STANDOFF 2 v0.37.1 ОФФСЕТЫ
+// Проверено: 16.02.2026
+// Источник: t.me/perpelexityso2
+// Автор: t.me/zxzniktozxz
+// ============================================
+
+// ============================================
+// TYPE INFO ОФФСЕТЫ (Классы менеджеров)
+// ============================================
+
+PlayerManager_TypeInfo = 135621384 (0x8158008) ✅ ПРОВЕРЕНО
+GrenadeManager_TypeInfo = 138151768 (0x83ECE68)
+BombManager_TypeInfo = 138126120 (0x83E6928)
+
+// ============================================
+// ЦЕПОЧКА ДОСТУПА К МЕНЕДЖЕРАМ
+// ============================================
+
+// Цепочка получения PlayerManager instance:
+// rpm(rpm(rpm(rpm(il2cpp_base + TypeInfo) + 0x100) + 0x130) + 0x0)
+// Шаг 1: TypeInfo + 0x100 → StaticFields
+// Шаг 2: StaticFields + 0x130 → Указатель на Instance
+// Шаг 3: Instance pointer + 0x0 → PlayerManager instance
+
+
+// ============================================
+// ОФФСЕТЫ PLAYER MANAGER
+// ============================================
+
+PlayerManager + 0x28 → Dictionary<int, PlayerController> (список игроков)
+PlayerManager + 0x70 → LocalPlayer (PlayerController)
+
+// Структура Dictionary:
+Dictionary + 0x18 → Entry[] entries (массив записей)
+Dictionary + 0x20 → int count (количество)
+Шаг Entry: 0x18
+Entry + 0x08 → int key (ID игрока)
+Entry + 0x10 → PlayerController* value (указатель на игрока)
+
+// ============================================
+// ОФФСЕТЫ PLAYER CONTROLLER
+// ============================================
+
+PlayerController + 0x48 → PlayerCharacterView (вид персонажа)
+PlayerController + 0x80 → AimController (контроллер прицеливания)
+PlayerController + 0x88 → WeaponryController (контроллер оружия)
+PlayerController + 0x98 → MovementController (контроллер движения)
+PlayerController + 0xA0 → ArmsAnimationController (анимация рук)
+PlayerController + 0xB0 → PlayerOcclusionController (видимость)
+PlayerController + 0xE0 → PlayerMainCamera (камера игрока)
+PlayerController + 0x148 → PhotonView (сетевой вид)
+PlayerController + 0x158 → PhotonPlayer (сетевой игрок)
+
+// ============================================
+// ОФФСЕТЫ PHOTON PLAYER (Сетевые данные)
+// ============================================
+
+PhotonPlayer + 0x20 → String name (никнейм)
+PhotonPlayer + 0x38 → PropertiesRegistry (CustomProperties)
+
+// Структура PropertiesRegistry:
+PropertiesRegistry + 0x18 → List entries (список записей)
+PropertiesRegistry + 0x20 → int count (количество)
+Шаг Entry: 0x18
+Entry + 0x28 → String key (ключ)
+Entry + 0x30 → object value (значение)
+Value + 0x10 → actual data (реальные данные: int/float/etc)
+
+// Ключи CustomProperties (найдены через runtime анализ):
+// "health" - здоровье игрока (int)
+// "ping" - пинг игрока (int)
+// "team" - команда игрока (1 или 2)
+// "pl" - платформа (1=Android, 2=iOS, 0=неизвестно)
+// "money" - деньги игрока (int)
+// "score" - счёт игрока (int)
+// "kills" - убийства игрока (int)
+// "death" - смерти игрока (int)
+// "assists" - ассисты игрока (int)
+// "weapon" - ID текущего оружия (int)
+// "uid" - уникальный ID игрока (uint64)
+// "clan_tag" - клан-тег (string)
+// "armor" - значение брони (int)
+// "helmet" - шлем надет (bool)
+
+// ============================================
+// ОФФСЕТЫ MOVEMENT CONTROLLER (Позиция)
+// ============================================
+
+MovementController + 0xA8 → TranslationParameters
+MovementController + 0xB0 → TransformData
+MovementController + 0xF0 → Character (для Air Jump)
+
+TransformData + 0x44 → Vector3 position (позиция)
+
+// JumpParameters:
+JumpParameters + 0x10 → float upwardSpeedDefualt (BunnyHop)
+JumpParameters + 0x60 → float JumpMoveSpeed (BunnyHop)
+
+// Character (для Air Jump):
+Character + 0x10 → ptr
+ptr + 0xCC → uint8_t jump state (писать 4 для прыжка в воздухе)
+
+// ============================================
+// ОФФСЕТЫ КАМЕРЫ (View Matrix)
+// ============================================
+
+PlayerMainCamera + 0x20 → Transform
+PlayerMainCamera + 0x28 → CameraScopeZoomer
+
+Transform + 0x10 → Camera object (native_camera)
+
+Camera + 0x100 → matrix (4x4 view matrix)
+Camera + 0x180 → float FOV (для Aspect Ratio)
+Camera + 0x4f0 → float aspect ratio (соотношение сторон)
+
+// CameraScopeZoomer:
+CameraScopeZoomer + 0x38 → float _fov (Camera FOV хак)
+
+// ============================================
+// ОФФСЕТЫ AIM CONTROLLER (Аимбот)
+// ============================================
+
+AimController + 0x90 → AimingData
+
+AimingData + 0x18 → float pitch (вертикальный угол)
+AimingData + 0x1C → float yaw (горизонтальный угол)
+AimingData + 0x24 → float pitch (резервный)
+AimingData + 0x28 → float yaw (резервный)
+
+// ============================================
+// ОФФСЕТЫ WEAPONRY CONTROLLER
+// ============================================
+
+WeaponryController + 0x98 → KitController
+WeaponryController + 0xA0 → WeaponController (GunController)
+
+// ============================================
+// ОФФСЕТЫ WEAPON CONTROLLER (Оружие)
+// ============================================
+
+WeaponController + 0xA0 → WeaponParameters (для информации об оружии)
+WeaponController + 0xA8 → WeaponParameters (для Wallshot)
+WeaponController + 0x100 → float fire delay (Fire Rate хак)
+WeaponController + 0x110 → int ammo in magazine (Infinity Ammo)
+WeaponController + 0x114 → int reserve ammo (Infinity Ammo)
+WeaponController + 0x118 → CDCDAGFDAFHEGGG reserve ammo struct (Infinity Ammo)
+WeaponController + 0x120 → CDCDAGFDAFHEGGG magazine ammo struct (Infinity Ammo)
+WeaponController + 0x160 → GunParameters
+
+
+// ============================================
+// ОФФСЕТЫ WEAPON PARAMETERS
+// ============================================
+
+WeaponParameters + 0x18 → int weapon ID (ID оружия)
+WeaponParameters + 0x98 → String weapon name (название оружия)
+
+
+// ============================================
+// ОФФСЕТЫ ARMS ANIMATION CONTROLLER
+// ============================================
+
+ArmsAnimationController + 0xE8 → Vector3 viewmodel offset (Viewmodel хак)
+
+// ============================================
+// ОФФСЕТЫ PLAYER OCCLUSION CONTROLLER
+// ============================================
+
+PlayerOcclusionController + 0x34 → int visibility state (2 = видимый)
+PlayerOcclusionController + 0x38 → int occlusion state (1 = закрыт)
+
+// ============================================
+// ОФФСЕТЫ PHOTON VIEW
+// ============================================
+
+PhotonView + 0x50 → int lag state (Clumsy хак: 0=лаг, 2=нормально)
+
+// ============================================
+// ОФФСЕТЫ BIPED MAP (Кости скелета)
+// ============================================
+
+PlayerCharacterView + 0x48 → BipedMap
+
+// Оффсеты костей (BipedMap + оффсет):
+Head = 0x20 (Голова)
+Neck = 0x28 (Шея)
+Spine = 0x30 (Позвоночник)
+Spine1 = 0x38 (Позвоночник 1)
+Spine2 = 0x40 (Позвоночник 2)
+LeftShoulder = 0x48 (Левое плечо)
+LeftElbow = 0x50 (Левый локоть)
+LeftHand = 0x58 (Левая рука)
+RightShoulder = 0x68 (Правое плечо)
+RightElbow = 0x70 (Правый локоть)
+RightHand = 0x78 (Правая рука)
+Hip = 0x88 (Бедро)
+LeftThigh = 0x90 (Левое бедро)
+LeftKnee = 0x98 (Левое колено)
+LeftFoot = 0xA0 (Левая нога)
+RightThigh = 0xB0 (Правое бедро)
+RightKnee = 0xB8 (Правое колено)
+RightFoot = 0xC0 (Правая нога)
+
+// Структура Bone Transform:
+BoneTransform + 0x10 → TransformObject
+TransformObject + 0x38 → matrix_ptr
+TransformObject + 0x40 → index
+matrix_ptr + 0x18 → matrix_list
+matrix_ptr + 0x20 → matrix_indices
+
+// ============================================
+// ОФФСЕТЫ GRENADE MANAGER
+// ============================================
+
+GrenadeManager + 0x28 → Dictionary<int, GrenadeController> (список гранат)
+
+// Структура Dictionary: такая же как у PlayerManager
+
+// GrenadeController:
+GrenadeController + 0x40 → Transform
+GrenadeController + 0x48 → int grenade_id (91=HE, 92=Smoke, 93=Flash, 94=Molotov, 95=Incendiary)
+GrenadeController + 0x4C → int state (0=Брошена, 1=Остановлена, 2=НеУстановлена, 3=Взорвана)
+GrenadeController + 0x50 → int detonation_type (0=ПоТаймеру, 1=ПослеОстановки, 2=ОдинУдар, 3=ОдинУдарПол)
+
+// Позиция Transform:
+Transform + 0x10 → TransformObject
+TransformObject + 0x38 → matrix_ptr
+TransformObject + 0x40 → index
+matrix_ptr + 0x18 → matrix_list
+matrix_list + (sizeof(TMatrix) * index) → Vector3 position
+
+// ============================================
+// ОФФСЕТЫ BOMB MANAGER
+// ============================================
+
+BombManager + 0x28 → BombController
+
+// BombController:
+BombController + 0x40 → Transform (позиция)
+BombController + 0x48 → bool is_planted (установлена)
+BombController + 0x49 → bool is_defused (обезврежена)
+BombController + 0x4A → bool is_detonated (взорвана)
+BombController + 0x4C → float timer (таймер)
+
+// ============================================
+// СТРУКТУРА UNITY STRING
+// ============================================
+
+String + 0x10 → int length (длина)
+String + 0x14 → char16_t[] chars (UTF-16, 2 байта на символ)
+
+// ============================================
+// СТРУКТУРА VECTOR3
+// ============================================
+
+Vector3:
+  float x
+  float y
+  float z
+
+// ============================================
+// СТРУКТУРА MATRIX (4x4)
+// ============================================
+
+Matrix:
+  float m11, m12, m13, m14
+  float m21, m22, m23, m24
+  float m31, m32, m33, m34
+  float m41, m42, m43, m44
+
+// ============================================
+// СТРУКТУРА TMATRIX (Transform)
+// ============================================
+
+TMatrix:
+  Vector4 position (позиция)
+  Quaternion rotation (вращение)
+  Vector4 scale (масштаб)
+
+// ============================================
+// ПРИМЕЧАНИЯ
+// ============================================
+
+// 1. Все оффсеты в шестнадцатеричном формате если не указано иное
+// 2. Структуры SafeFloat используют XOR шифрование - используй функцию setSafe()
+// 3. Адреса TypeInfo абсолютные (добавляются к базе libunity.so)
+// 4. Все остальные оффсеты относительны к их родительской структуре
+// 5. Nullable структуры имеют +0x4 padding перед реальным значением
+// 6. Ключи CustomProperties чувствительны к регистру
+// 7. Определение платформы: pl=1 (Android), pl=2 (iOS), pl=0 (Неизвестно)
+// 9. Проверка видимости: visibilityState==2 && occlusionState!=1
+// 10. Трансформации костей используют сложные матричные вычисления
+
+// ============================================
+// СПИСОК ИЗМЕНЕНИЙ
+// ============================================
+
+// v0.37.1 (16.02.2026):
+// - PlayerManager TypeInfo изменён: 135070688 → 135621384
+// - GrenadeManager TypeInfo изменён: 135054416 → 138151768
+// - BombManager TypeInfo изменён: 135028352 → 138126120
+// - Все внутренние оффсеты остались без изменений с v0.37.0
+// - Структура CustomProperties вернулась к PropertiesRegistry (с Hashtable в ранней 0.37.1)
+// - Оффсет WeaponController в WeaponryController: 0x98 → 0xA0
+
+// ============================================
+// КОНЕЦ ФАЙЛА
+// ============================================
